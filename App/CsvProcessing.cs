@@ -12,6 +12,11 @@ public static class CsvProcessing
     // Resources.
     private static string _fPath = string.Empty;
 
+    /// <summary>
+    /// Read data from file to matrix view.
+    /// </summary>
+    /// <param name="csvFilePath">Path fo file with csv data.</param>
+    /// <returns>List of fields in arrays.</returns>
     private static List<string[]> ReadToMatrix(string csvFilePath)
     {
         var parser = new CsvParser(csvFilePath);
@@ -36,6 +41,11 @@ public static class CsvProcessing
         return MatrixToRecords(matrix);
     }
 
+    /// <summary>
+    /// Finds index for each column in headers.
+    /// </summary>
+    /// <param name="headers"></param>
+    /// <returns>ColumnName to index in headers.</returns>
     private static Dictionary<string, int> HeaderToIndex(string[] headers)
     {
         var headerToIndex = new Dictionary<string, int>();
@@ -88,12 +98,17 @@ public static class CsvProcessing
             .ToList();
     }
 
+    /// <summary>
+    /// Converts array of fields to sb with separator and quotes.
+    /// </summary>
+    /// <param name="record">One line with fields in array.</param>
+    /// <returns>Formatted data to write in file.</returns>
     private static StringBuilder RecordToSb(string?[] record)
     {
         var sb = new StringBuilder();
         foreach (string? field in record)
         {
-            sb.Append('"' + (field ?? "") + '"' + Utils.Constants.FieldsSeparator);
+            sb.Append(CsvParser.Quote + (field ?? string.Empty) + CsvParser.Quote + CsvParser.Separator);
         }
 
         sb.Remove(sb.Length - 1, 1);
@@ -120,7 +135,7 @@ public static class CsvProcessing
             }
             
             File.WriteAllText(_fPath, resultSb.ToString());
-            return message + "Data saved to file.";
+            return message + Constants.DataSavedMessage;
         }
         catch (Exception ex)
         {
@@ -149,7 +164,7 @@ public static class CsvProcessing
             }
             
             File.AppendAllText(nPath, resultSb.ToString());
-            return "Data added to specified file.";
+            return Constants.DataAddedMessage;
         }
         catch (Exception ex)
         {

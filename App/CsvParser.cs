@@ -1,5 +1,4 @@
 using System.Text;
-using Utils;
 
 namespace App;
 
@@ -9,8 +8,8 @@ namespace App;
 /// </summary>
 public class CsvParser
 {
-    private readonly char _separator;
-    private const char Quote = '"';
+    public const char Separator = Utils.Constants.FieldsSeparator;
+    public const char Quote = '"';
 
     private readonly string _fPath;
     private string[] _pendingFieldLine;
@@ -22,11 +21,9 @@ public class CsvParser
     /// Initialization.
     /// </summary>
     /// <param name="path">Path to file.</param>
-    /// <param name="sep">Fields separator.</param>
-    public CsvParser(string path, char sep = Utils.Constants.FieldsSeparator)
+    public CsvParser(string path)
     {
         _fPath = path;
-        _separator = sep;
         _pendingFieldLine = Array.Empty<string>();
     }
 
@@ -39,134 +36,6 @@ public class CsvParser
     {
         baseArr = arrays
             .Aggregate(baseArr, (current, arr) => current.Concat(arr).ToArray());
-    }
-
-    /// <summary>
-    /// It is used for static parsing of a ready-made record.
-    /// </summary>
-    /// <param name="line">Record in string.</param>
-    /// <param name="sep">Fields separator.</param>
-    /// <returns>Fields of record.</returns>
-    public static string[] ParseCorrectCsvRecord(string line, char sep)
-    {
-        string[] result = Array.Empty<string>();
-        bool quoted = false;
-        bool withQuotes = false;
-
-        StringBuilder field = new ();
-
-        foreach (char ch in line)
-        {
-            if (ch == Quote && withQuotes)
-            {
-                if (field.Length > 0)
-                {
-                    field.Append(ch);
-                    withQuotes = false;
-                }
-            }
-            else
-            {
-                withQuotes = false;
-            }
-
-            if (ch == Quote)
-            {
-                quoted = !quoted;
-            }
-            else
-            {
-                if (ch == sep && !quoted)
-                {
-                    ConcatArrays(ref result, new[] { field.ToString() });
-                    field.Length = 0;
-                }
-                else
-                {
-                    field.Append(ch);
-                }
-            }
-        }
-
-        if (!quoted)
-        {
-            ConcatArrays(ref result, new[] { field.ToString() });
-        }
-
-        return result;
-    }
-
-    /// <summary>
-    /// Converts each row into an array of fields,
-    /// and then merges them into a single array.
-    /// </summary>
-    /// <param name="lines">Data records.</param>
-    /// <param name="columnCount">Count of columns.</param>
-    /// <param name="sep">Fields separator.</param>
-    /// <returns>Array of fields.</returns>
-    public static string[] LinesToFields(string[] lines, int columnCount, char sep)
-    {
-        int fieldsCount = columnCount * lines.Length;
-        int fieldsIndex = 0;
-        
-        string[] fields = new string[fieldsCount];
-        foreach (string line in lines)
-        {
-            string[] record = ParseCorrectCsvRecord(line, sep);
-            foreach (string field in record)
-            {
-                fields[fieldsIndex] = field;
-                fieldsIndex++;
-            }
-        }
-
-        return fields;
-    }
-
-    /// <summary>
-    /// Converts fields to a string.
-    /// </summary>
-    /// <param name="fields">Fields of record.</param>
-    /// <param name="sep">Fields separator.</param>
-    /// <returns>Record.</returns>
-    public static string FieldsToLine(string[] fields, char sep)
-    {
-        for (int i = 0; i < fields.Length; i++)
-        {
-            fields[i] = '\"' + fields[i] + '\"';
-        }
-
-        return string.Join(sep, fields);
-    }
-
-    /// <summary>
-    /// Converts an array of fields to an array of strings.
-    /// </summary>
-    /// <param name="fields">Array of fields.</param>
-    /// <param name="columnsCount">Count of columns.</param>
-    /// <param name="sep">Fields separator.</param>
-    /// <returns>Array of records in string.</returns>
-    public static string[] FieldsToLines(string[] fields, int columnsCount, char sep)
-    {
-        string[] lines = new string[fields.Length / columnsCount];
-        for (int i = 0; i < lines.Length; i++)
-        {
-            lines[i] = FieldsToLine(fields[(i * columnsCount)..((i + 1) * columnsCount)], sep);
-        }
-
-        return lines;
-    }
-
-    /// <summary>
-    /// All fields to the text ready to be written to the file.
-    /// </summary>
-    /// <param name="fields">Array of fields.</param>
-    /// <param name="columnCount">Count of columns.</param>
-    /// <param name="sep">Fields separator.</param>
-    /// <returns>Joined lines.</returns>
-    public static string FieldsToText(string[] fields, int columnCount, char sep)
-    {
-        return string.Join(Environment.NewLine, FieldsToLines(fields, columnCount, sep));
     }
 
     /// <summary>
@@ -211,7 +80,7 @@ public class CsvParser
             }
             else
             {
-                if (ch == _separator && !quoted)
+                if (ch == Separator && !quoted)
                 {
                     ConcatArrays(ref result, new[] { field.ToString() });
                     field.Length = 0;

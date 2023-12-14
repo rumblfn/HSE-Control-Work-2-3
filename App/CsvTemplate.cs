@@ -1,5 +1,3 @@
-using Utils;
-
 namespace App;
 
 /// <summary>
@@ -10,6 +8,7 @@ public class CsvTemplate
     // Each field in single string and the data must be template-based.
     private readonly string[][] _csvData;
     
+    /// <param name="csvData">Matrix of data to check.</param>
     public CsvTemplate(string[][] csvData)
     {
         _csvData = csvData;

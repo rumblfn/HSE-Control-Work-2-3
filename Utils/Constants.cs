@@ -17,7 +17,7 @@ public struct Constants
     public const string ColumnCountErrorMessage = "Error with count of columns.";
     public const string HeadersErrorMessage = "Error in headers.";
     
-    // Default template headers.
+    // Default template headers with indexes.
     public static readonly Dictionary<string, int> Headers = new()
     {
         {"", 22},

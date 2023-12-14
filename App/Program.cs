@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Entities;
+﻿using Entities;
 using Utils;
 
 namespace App;
@@ -25,8 +24,7 @@ internal static class Program
     private static void Run()
     {
         ConsoleMethod.NicePrint(Constants.FileNameInputMessage);
-        string userPathInput = "/Users/samilvaliahmetov/Projects/ControlHomework2-3/assets/Театры.csv"; 
-        // ConsoleMethod.ReadLine();
+        string userPathInput = ConsoleMethod.ReadLine();
 
         List<Theatre> records = CsvProcessing.Read(userPathInput);
         DataPanel panel = new(records);

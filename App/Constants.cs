@@ -8,7 +8,9 @@ internal struct Constants
     public const ConsoleKey ExitKeyboardKey = ConsoleKey.Q;
     public const string ProgramFinishedMessage = "Program finished.";
     
+    public const string DataAddedMessage = "Data added to specified file.";
     public const string FileNameInputMessage = "Enter the file name:";
+    public const string DataSavedMessage = "Data saved to file.";
 
     public const string PanelMessage = 
         "Press Q to exit.\n" +
