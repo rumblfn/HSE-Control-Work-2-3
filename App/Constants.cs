@@ -11,7 +11,6 @@ internal struct Constants
     public const string DataAddedMessage = "Data added to specified file.";
     public const string FileNameInputMessage = "Enter the file name:";
     public const string DataSavedMessage = "Data saved to file.";
-
     public const string PanelMessage = 
         "Press Q to exit.\n" +
         "This is a panel for working with a csv file.\n" +
