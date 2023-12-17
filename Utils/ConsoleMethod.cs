@@ -1,6 +1,3 @@
-using Entities;
-using Enums;
-
 namespace Utils;
 
 /// <summary>
@@ -55,19 +52,28 @@ public static class ConsoleMethod
     }
 
     /// <summary>
+    /// Removes unnecessary characters or adds empty ones
+    /// if the length is less than necessary.
+    /// </summary>
+    /// <returns>Formatted string.</returns>
+    private static string GetFormattedValue(string? value, int needLength)
+    {
+        value ??= "";
+        int emptySpaces = needLength - value.Length;
+        if (emptySpaces > 0)
+        {
+            value += new string(' ', emptySpaces);
+        }
+
+        return value;
+    }
+
+    /// <summary>
     /// Outputs fields to the console.
     /// Adapts for console width.
     /// </summary>
-    public static void PrintRecordsAsTable(List<Theatre> records, Direction direction, int limit)
+    public static void PrintRecordsAsTable(List<List<List<string?>>> recordsArray)
     {
-        limit -= 1;
-        Theatre header = records[0];
-        records = direction == 0
-            ? records.GetRange(1, Math.Min(records.Count - 1, limit))
-            : records.GetRange(Math.Max(records.Count - limit, 1), limit);
-        records.Insert(0, header);
-        List<List<List<string?>>> recordsArray = records.Select(record => record.ToMatrixView()).ToList();
-
         int windowWidth = Console.WindowWidth - 1;
         int defaultColumnWidth = windowWidth / recordsArray[0].Count - 3;
         int lastColumnWidth = windowWidth - (defaultColumnWidth + 3) * (recordsArray[0].Count - 1) - 3;
@@ -82,18 +88,13 @@ public static class ConsoleMethod
         {
             for (int j = 0; j < rowsMaxCountInRecord; j++)
             {
-                int emptySpaces;
                 string value;
                 
                 for (int columnIndex = 0; columnIndex < record.Count - 1; columnIndex++)
                 {
                     NicePrint("|", CustomColor.Secondary, " ");
-                    value = record[columnIndex][0] ?? "";
-                    emptySpaces = defaultColumnWidth - value.Length;
-                    if (emptySpaces > 0)
-                    {
-                        value += new string(' ', emptySpaces);
-                    }
+                    value = GetFormattedValue(record[columnIndex][0], defaultColumnWidth);
+                    
                     NicePrint(value[..Math.Min(defaultColumnWidth, value.Length)], CustomColor.Primary, " ");
                     if (value.Length > defaultColumnWidth)
                     {
@@ -106,12 +107,7 @@ public static class ConsoleMethod
                 }
                 
                 NicePrint("|", CustomColor.Secondary, " ");
-                value = record[^1][j] ?? "";
-                emptySpaces = lastColumnWidth - value.Length;
-                if (emptySpaces > 0)
-                {
-                    value += new string(' ', emptySpaces);
-                }
+                value = GetFormattedValue(record[^1][j], lastColumnWidth);
                 NicePrint(value[..Math.Min(value.Length, lastColumnWidth)], CustomColor.Primary, " ");
                 NicePrint("|", CustomColor.Secondary, Environment.NewLine);
             }

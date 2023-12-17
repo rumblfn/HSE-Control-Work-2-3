@@ -77,7 +77,7 @@ internal class DataPanel
     {
         ConsoleMethod.NicePrint("> Specify absolute path or default will be used:", CustomColor.Primary);
         string nPath = ConsoleMethod.ReadLine();
-        string message = "";
+        string message;
 
         switch (type)
         {
@@ -155,10 +155,11 @@ internal class DataPanel
     {
         if (_data.Count > 1)
         {
-            Direction direction = GetDirection();
             int count = GetCount();
-        
-            ConsoleMethod.PrintRecordsAsTable(_data, direction, count);
+            Direction direction = GetDirection();
+            List<List<List<string?>>> formattedRecords = DataProcessing.GetPreview(_data, direction, count);
+            
+            ConsoleMethod.PrintRecordsAsTable(formattedRecords);
             ConsoleMethod.NicePrint("Press any key to continue.", CustomColor.ErrorColor);
             ConsoleMethod.ReadKey();
         

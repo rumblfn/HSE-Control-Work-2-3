@@ -71,4 +71,15 @@ public static class DataProcessing
         records.Insert(0, headers);
         return records;
     }
+
+    public static List<List<List<string?>>> GetPreview(List<Theatre> records, Direction direction, int limit)
+    {
+        limit -= 1;
+        Theatre header = records[0];
+        records = direction == Direction.Top
+            ? records.GetRange(1, Math.Min(records.Count - 1, limit))
+            : records.GetRange(Math.Max(records.Count - limit, 1), limit);
+        records.Insert(0, header);
+        return records.Select(record => record.ToMatrixView()).ToList();
+    }
 }
