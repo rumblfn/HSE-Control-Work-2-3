@@ -2,7 +2,7 @@ using System.Text;
 using Entities;
 using Utils;
 
-namespace App;
+namespace App.CSV;
 
 /// <summary>
 /// Csv methods.
@@ -17,15 +17,15 @@ public static class CsvProcessing
     /// </summary>
     /// <param name="csvFilePath">Path fo file with csv data.</param>
     /// <returns>List of fields in arrays.</returns>
-    private static List<string[]> ReadToMatrix(string csvFilePath)
+    private static List<List<string>> ReadToMatrix(string csvFilePath)
     {
         var parser = new CsvParser(csvFilePath);
-        string[][] matrix = parser.Parse();
+        List<List<string>> matrix = parser.Parse();
 
         var template = new CsvTemplate(matrix);
         template.ValidateTemplate();
 
-        return matrix.ToList();
+        return matrix;
     }
 
     /// <summary>
@@ -37,7 +37,7 @@ public static class CsvProcessing
     {
         _fPath = csvFilePath;
 
-        List<string[]> matrix = ReadToMatrix(csvFilePath);
+        List<List<string>> matrix = ReadToMatrix(csvFilePath);
         return MatrixToRecords(matrix);
     }
 
@@ -46,12 +46,12 @@ public static class CsvProcessing
     /// </summary>
     /// <param name="headers"></param>
     /// <returns>ColumnName to index in headers.</returns>
-    private static Dictionary<string, int> HeaderToIndex(string[] headers)
+    private static Dictionary<string, int> HeaderToIndex(IList<string> headers)
     {
         var headerToIndex = new Dictionary<string, int>();
         foreach (string header in Utils.Constants.Headers.Keys)
         {
-            headerToIndex[header] = Array.IndexOf(headers, header);
+            headerToIndex[header] = headers.IndexOf(header);
         }
 
         return headerToIndex;
@@ -62,10 +62,9 @@ public static class CsvProcessing
     /// </summary>
     /// <param name="matrix">Array of parsed csv lines.</param>
     /// <returns>Parsed matrix.</returns>
-    private static List<Theatre> MatrixToRecords(List<string[]> matrix)
+    private static List<Theatre> MatrixToRecords(List<List<string>> matrix)
     {
         Dictionary<string, int> headerToIndex = HeaderToIndex(matrix[0]);
-
         return matrix.Select(record => new Theatre
             {
                 X_WGS = record[headerToIndex["X_WGS"]],
@@ -103,7 +102,7 @@ public static class CsvProcessing
     /// </summary>
     /// <param name="record">One line with fields in array.</param>
     /// <returns>Formatted data to write in file.</returns>
-    private static StringBuilder RecordToSb(string?[] record)
+    private static StringBuilder RecordToSb(IEnumerable<string?> record)
     {
         var sb = new StringBuilder();
         foreach (string? field in record)
@@ -153,7 +152,7 @@ public static class CsvProcessing
         try
         {
             var resultSb = new StringBuilder();
-            List<string[]> matrixOfExistingData = ReadToMatrix(nPath);
+            List<List<string>> matrixOfExistingData = ReadToMatrix(nPath);
             Dictionary<string, int> headerToIndex = HeaderToIndex(matrixOfExistingData[0]);
             
             for (int i = 1; i < data.Count; i++)

@@ -1,4 +1,4 @@
-namespace App;
+namespace App.CSV;
 
 /// <summary>
 /// Class for validation csv data by template.
@@ -6,10 +6,10 @@ namespace App;
 public class CsvTemplate
 {
     // Each field in single string and the data must be template-based.
-    private readonly string[][] _csvData;
+    private readonly List<List<string>> _csvData;
     
     /// <param name="csvData">Matrix of data to check.</param>
-    public CsvTemplate(string[][] csvData)
+    public CsvTemplate(List<List<string>> csvData)
     {
         _csvData = csvData;
     }
@@ -20,7 +20,7 @@ public class CsvTemplate
     /// <exception cref="ArgumentNullException">Returns if row count is less than need.</exception>
     private void ValidateRowCount()
     {
-        if (_csvData.Length < Utils.Constants.HeaderRowsCount)
+        if (_csvData.Count < Utils.Constants.HeaderRowsCount)
         {
             throw new ArgumentNullException(Utils.Constants.FileRowsLengthErrorMessage);
         }
@@ -34,7 +34,7 @@ public class CsvTemplate
     /// </exception>
     private void ValidateColumnCount()
     {
-        if (_csvData.Any(record => record.Length != Utils.Constants.ColumnCount))
+        if (_csvData.Any(record => record.Count != Utils.Constants.ColumnCount))
         {
             throw new ArgumentNullException(Utils.Constants.ColumnCountErrorMessage);
         }
@@ -48,11 +48,10 @@ public class CsvTemplate
     /// <exception cref="ArgumentNullException">Error in headers.</exception>
     private void ValidateHeaders()
     {
-        string[] headers = _csvData[0];
-        
+        List<string> headers = _csvData[0];
         foreach (KeyValuePair<string, int> header in Utils.Constants.Headers)
         {
-            int index = Array.IndexOf(headers, header.Key);
+            int index = headers.IndexOf(header.Key);
             if (index < 0)
             {
                 throw new ArgumentNullException(Utils.Constants.HeadersErrorMessage);

@@ -6,7 +6,7 @@ namespace Utils;
 /// <summary>
 /// Class for common console methods.
 /// </summary>
-public class ConsoleMethod
+public static class ConsoleMethod
 {
     /// <summary>
     /// Simple readKey method to avoid errors.
@@ -47,30 +47,75 @@ public class ConsoleMethod
     /// <param name="message">Message content.</param>
     /// <param name="color">Message color.</param>
     /// <param name="end">End of line.</param>
-    public static void NicePrint(string message, ConsoleColor color = CustomColor.DefaultColor, string? end = null)
+    public static void NicePrint(string? message, ConsoleColor color = CustomColor.DefaultColor, string? end = null)
     {
         Console.ForegroundColor = color;
-        Console.Write(message + (end ?? Environment.NewLine));
+        Console.Write((message ?? "") + (end ?? Environment.NewLine));
         Console.ResetColor();
     }
 
     /// <summary>
-    /// Outputs fields to the console with the specified columns count.
-    /// Where each field follows each other in array.
-    /// Adjusts the length of the column relative to the data required for output
-    /// and the width of the console.
+    /// Outputs fields to the console.
+    /// Adapts for console width.
     /// </summary>
     public static void PrintRecordsAsTable(List<Theatre> records, Direction direction, int limit)
     {
-        NicePrint(records[0].ToString());
         limit -= 1;
+        Theatre header = records[0];
         records = direction == 0
             ? records.GetRange(1, Math.Min(records.Count - 1, limit))
             : records.GetRange(Math.Max(records.Count - limit, 1), limit);
+        records.Insert(0, header);
+        List<List<List<string?>>> recordsArray = records.Select(record => record.ToMatrixView()).ToList();
+
+        int windowWidth = Console.WindowWidth - 1;
+        int defaultColumnWidth = windowWidth / recordsArray[0].Count - 3;
+        int lastColumnWidth = windowWidth - (defaultColumnWidth + 3) * (recordsArray[0].Count - 1) - 3;
+
+        string rowsSeparator = new('-', windowWidth);
+        int rowsMaxCountInRecord = recordsArray[0].Select(field => field.Count).Max();
         
-        foreach (Theatre record in records)
+        NicePrint($"Record(s): {recordsArray.Count - 1}", CustomColor.Primary);
+        NicePrint(rowsSeparator, CustomColor.Secondary);
+        
+        foreach (List<List<string?>> record in recordsArray)
         {
-            NicePrint(record.ToString());
+            for (int j = 0; j < rowsMaxCountInRecord; j++)
+            {
+                int emptySpaces;
+                string value;
+                
+                for (int columnIndex = 0; columnIndex < record.Count - 1; columnIndex++)
+                {
+                    NicePrint("|", CustomColor.Secondary, " ");
+                    value = record[columnIndex][0] ?? "";
+                    emptySpaces = defaultColumnWidth - value.Length;
+                    if (emptySpaces > 0)
+                    {
+                        value += new string(' ', emptySpaces);
+                    }
+                    NicePrint(value[..Math.Min(defaultColumnWidth, value.Length)], CustomColor.Primary, " ");
+                    if (value.Length > defaultColumnWidth)
+                    {
+                        record[columnIndex][0] = value[Math.Min(defaultColumnWidth, value.Length)..];
+                    }
+                    else
+                    {
+                        record[columnIndex][0] = "";
+                    }
+                }
+                
+                NicePrint("|", CustomColor.Secondary, " ");
+                value = record[^1][j] ?? "";
+                emptySpaces = lastColumnWidth - value.Length;
+                if (emptySpaces > 0)
+                {
+                    value += new string(' ', emptySpaces);
+                }
+                NicePrint(value[..Math.Min(value.Length, lastColumnWidth)], CustomColor.Primary, " ");
+                NicePrint("|", CustomColor.Secondary, Environment.NewLine);
+            }
+            NicePrint(rowsSeparator, CustomColor.Secondary);
         }
     }
 }

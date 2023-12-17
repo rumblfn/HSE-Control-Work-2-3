@@ -1,5 +1,6 @@
 using App.Components;
 using Entities;
+using App.CSV;
 using Enums;
 using Utils;
 
@@ -33,15 +34,15 @@ internal class DataPanel
         {
             new MenuGroup("Filter by column", new MenuItem[]
             {
-                new("ChiefName", () => HandleSelecting("ChiefName")),
-                new("AdmArea", () => HandleSelecting("AdmArea")),
+                new("ChiefName", () => HandleSelecting(FilterColumns.ChiefName)),
+                new("AdmArea", () => HandleSelecting(FilterColumns.AdmArea)),
             }),
             new MenuGroup("Sort by Capacity", new MenuItem[]
             {
                 new("Ascending", 
-                    () => HandleSorting("Ascending")),
+                    () => HandleSorting(SortType.Ascending)),
                 new("Descending", 
-                    () => HandleSorting("Descending")),
+                    () => HandleSorting(SortType.Descending)),
             }),
             new MenuGroup("Save", new MenuItem[]
             {
@@ -127,9 +128,13 @@ internal class DataPanel
         }
     }
 
+    /// <summary>
+    /// Reads the number of items to be displayed.
+    /// </summary>
+    /// <returns>Limit of records.</returns>
     private int GetCount()
     {
-        int limit = 0;
+        int limit;
         do
         {
             ConsoleMethod.NicePrint(
@@ -169,7 +174,7 @@ internal class DataPanel
     /// Selecting data by columns and user search.
     /// </summary>
     /// <param name="column">Column to check.</param>
-    private void HandleSelecting(string column)
+    private void HandleSelecting(FilterColumns column)
     {
         ConsoleMethod.NicePrint(Constants.SearchMessage, CustomColor.Primary);
         string search = ConsoleMethod.ReadLine();
@@ -181,7 +186,7 @@ internal class DataPanel
     /// Sorting data by specified column and type.
     /// </summary>
     /// <param name="sortType">Alphabetic or Descending.</param>
-    private void HandleSorting(string sortType)
+    private void HandleSorting(SortType sortType)
     {
         _data = DataProcessing.SortingByCapacity(_data, sortType);
         Restore($"{sortType} sorting by capacity completed.");

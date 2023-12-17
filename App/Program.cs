@@ -1,4 +1,6 @@
-﻿using Entities;
+﻿using System.Text;
+using Entities;
+using App.CSV;
 using Utils;
 
 namespace App;
@@ -36,6 +38,7 @@ internal static class Program
     /// </summary>
     private static void Main()
     {
+        Console.InputEncoding = Encoding.UTF8;
         ConsoleMethod.NicePrint(Constants.ProgramStartedMessage, CustomColor.SystemColor);
         
         do

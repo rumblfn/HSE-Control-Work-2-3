@@ -1,6 +1,5 @@
 using System.Text;
-
-namespace App;
+namespace App.CSV;
 
 /// <summary>
 /// Contains methods for working with raw csv data.
@@ -12,7 +11,7 @@ public class CsvParser
     public const char Quote = '"';
 
     private readonly string _fPath;
-    private string[] _pendingFieldLine;
+    private List<string> _pendingFieldLine;
 
     private bool _multiline;
     private string _pendingField = "";
@@ -24,18 +23,7 @@ public class CsvParser
     public CsvParser(string path)
     {
         _fPath = path;
-        _pendingFieldLine = Array.Empty<string>();
-    }
-
-    /// <summary>
-    /// Merges all arrays into the first one.
-    /// </summary>
-    /// <param name="baseArr">Target array.</param>
-    /// <param name="arrays">Other arrays.</param>
-    private static void ConcatArrays(ref string[] baseArr, params string[][] arrays)
-    {
-        baseArr = arrays
-            .Aggregate(baseArr, (current, arr) => current.Concat(arr).ToArray());
+        _pendingFieldLine = new List<string>();
     }
 
     /// <summary>
@@ -43,11 +31,11 @@ public class CsvParser
     /// </summary>
     /// <param name="line">One line of file.</param>
     /// <returns>Parsed fields.</returns>
-    private string[] ParseLine(string line)
+    private IEnumerable<string> ParseLine(string line)
     {
-        string[] result = Array.Empty<string>();
-        bool quoted = false;
+        var result = new List<string>();
         bool withQuotes = false;
+        bool quoted = false;
 
         StringBuilder field = new ();
 
@@ -82,7 +70,7 @@ public class CsvParser
             {
                 if (ch == Separator && !quoted)
                 {
-                    ConcatArrays(ref result, new[] { field.ToString() });
+                    result.Add(field.ToString());
                     field.Length = 0;
                 }
                 else
@@ -99,7 +87,7 @@ public class CsvParser
         }
         else
         {
-            ConcatArrays(ref result, new[] { field.ToString() });
+            result.Add(field.ToString());
         }
 
         return result;
@@ -109,11 +97,10 @@ public class CsvParser
     /// Csv main parse function.
     /// </summary>
     /// <returns>Array of records.</returns>
-    public string[][] Parse()
+    public List<List<string>> Parse()
     {
-        string[] lines = File.ReadAllLines(_fPath);
-        string[][] matrix = new string[lines.Length][];
-        int currentLineIndex = 0;
+        string[] lines = File.ReadAllLines(_fPath, Encoding.UTF8);
+        var matrix = new List<List<string>>();
 
         foreach (string line in lines)
         {
@@ -122,29 +109,29 @@ public class CsvParser
                 continue;
             }
             
-            string[] csvLineInArray = ParseLine(line);
+            IEnumerable<string> csvLineInArray = ParseLine(line);
             if (_multiline)
             {
-                ConcatArrays(ref _pendingFieldLine, csvLineInArray);
+                _pendingFieldLine.AddRange(csvLineInArray);
             }
             else
             {
-                matrix[currentLineIndex] = Array.Empty<string>();
-                if (_pendingFieldLine is { Length: > 0 })
+                var currentRecord = new List<string>();
+                if (_pendingFieldLine is { Count: > 0 })
                 {
-                    ConcatArrays(ref matrix[currentLineIndex], _pendingFieldLine, csvLineInArray);
-                    _pendingFieldLine = Array.Empty<string>();
+                    currentRecord.AddRange(_pendingFieldLine);
+                    currentRecord.AddRange(csvLineInArray);
+                    _pendingFieldLine = new List<string>();
                 }
                 else
                 {
-                    matrix[currentLineIndex] = csvLineInArray;
+                    currentRecord.AddRange(csvLineInArray);
                 }
 
-                currentLineIndex++;
+                matrix.Add(currentRecord);
             }
         }
-            
-        matrix = matrix[..currentLineIndex];
+        
         return matrix;
     }
 }

@@ -1,3 +1,6 @@
+using Enums;
+using Microsoft.VisualBasic.CompilerServices;
+
 namespace Entities;
 
 /// <summary>
@@ -28,6 +31,11 @@ public class Theatre
     // Address.
     public Contacts? Contacts { get; init; }
 
+    /// <summary>
+    /// Converts record to array view.
+    /// </summary>
+    /// <param name="headerToIndex">The ratio of the column to the index in the view.</param>
+    /// <returns>Array of values with correct indexes.</returns>
     public string?[] ToArray(Dictionary<string, int> headerToIndex)
     {
         string?[] record = new string[headerToIndex.Count];
@@ -36,29 +44,66 @@ public class Theatre
         record[headerToIndex["OKPO"]] = OKPO;
         record[headerToIndex["X_WGS"]] = X_WGS;
         record[headerToIndex["Y_WGS"]] = Y_WGS;
-        record[headerToIndex["Email"]] = Contacts?.Email;
         record[headerToIndex["ROWNUM"]] = ROWNUM;
         record[headerToIndex["WebSite"]] = WebSite;
-        record[headerToIndex["AdmArea"]] = Contacts?.AdmArea;
-        record[headerToIndex["Address"]] = Contacts?.Address;
         record[headerToIndex["GLOBALID"]] = GLOBALID;
         record[headerToIndex["FullName"]] = FullName;
-        record[headerToIndex["District"]] = Contacts?.District;
         record[headerToIndex["ShortName"]] = ShortName;
         record[headerToIndex["ChiefName"]] = ChiefName;
         record[headerToIndex["CommonName"]] = CommonName;
-        record[headerToIndex["PublicPhone"]] = Contacts?.PublicPhone;
+        record[headerToIndex["Email"]] = Contacts?.Email;
         record[headerToIndex["WorkingHours"]] = WorkingHours;
+        record[headerToIndex["AdmArea"]] = Contacts?.AdmArea;
+        record[headerToIndex["Address"]] = Contacts?.Address;
         record[headerToIndex["ChiefPosition"]] = ChiefPosition;
+        record[headerToIndex["District"]] = Contacts?.District;
         record[headerToIndex["MainHallCapacity"]] = MainHallCapacity;
+        record[headerToIndex["PublicPhone"]] = Contacts?.PublicPhone;
         record[headerToIndex["AdditionalHallCapacity"]] = AdditionalHallCapacity;
         record[headerToIndex["ClarificationOfWorkingHours"]] = ClarificationOfWorkingHours;
 
         return record;
     }
 
-    public override string ToString()
+    /// <summary>
+    /// Transforms record to comfort matrix view
+    /// </summary>
+    /// <returns></returns>
+    public List<List<string?>> ToMatrixView()
     {
-        return $"{ROWNUM} | {ChiefName} | {MainHallCapacity} | {AdditionalHallCapacity} | a) {Contacts?.Fax} b) {Contacts?.Email} c) {Contacts?.AdmArea} d) {Contacts?.Address} e) {Contacts?.District} f) {Contacts?.PublicPhone}";
+        var matrix = new List<List<string?>>
+        {
+            new ()
+            {
+                ROWNUM
+            },
+            new ()
+            {
+                FullName
+            },
+            new ()
+            {
+                ChiefName
+            },
+            new ()
+            {
+                MainHallCapacity
+            },
+            new ()
+            {
+                AdditionalHallCapacity
+            },
+            new ()
+            {
+                "a) " + Contacts?.Fax,
+                "b) " + Contacts?.Email,
+                "c) " + Contacts?.AdmArea,
+                "d) " + Contacts?.Address,
+                "e) " + Contacts?.District,
+                "f) " + Contacts?.PublicPhone,
+            },
+        };
+
+        return matrix;
     }
 }

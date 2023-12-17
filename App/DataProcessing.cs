@@ -1,4 +1,5 @@
 using Entities;
+using Enums;
 
 namespace App;
 
@@ -8,38 +9,42 @@ namespace App;
 public static class DataProcessing
 {
     /// <summary>
+    /// Retrieves the field value for
+    /// the specified column from the table.
+    /// </summary>
+    /// <param name="theatre">Instance of the <see cref="Theatre"/>.</param>
+    /// <param name="column">Column for the search.</param>
+    /// <returns>Value in specified record and column.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Invalid column.</exception>
+    private static string? GetValue(Theatre theatre, FilterColumns column)
+    {
+        return column switch
+        {
+            FilterColumns.ChiefName => theatre.ChiefName,
+            FilterColumns.AdmArea => theatre.Contacts?.AdmArea,
+            _ => throw new ArgumentOutOfRangeException(nameof(column))
+        };
+    }
+    
+    /// <summary>
     /// Selection of records for the specified column and search query.
     /// </summary>
     /// <param name="records">Array of entities Theatre.</param>
     /// <param name="columnName">Column for search.</param>
     /// <param name="sub">Search query.</param>
     /// <returns>Suitable entries, including headers.</returns>
-    public static List<Theatre> SamplingByColumn(List<Theatre> records, string columnName, string sub)
+    public static List<Theatre> SamplingByColumn(List<Theatre> records, FilterColumns columnName, string sub)
     {
         Console.WriteLine(columnName);
         sub = sub.ToLower();
         var data = new List<Theatre> { records[0] };
-
-        if (columnName == "ChiefName")
+        
+        for (int i = 1; i < records.Count; i++)
         {
-            for (int i = 1; i < records.Count; i++)
+            string? value = GetValue(records[i], columnName);
+            if (value != null && value.ToLower().Contains(sub))
             {
-                string? chiefName = records[i].ChiefName;
-                if (chiefName != null && chiefName.ToLower().Contains(sub))
-                {
-                    data.Add(records[i]);
-                }
-            }
-        }
-        else
-        {
-            for (int i = 1; i < records.Count; i++)
-            {
-                string? admArea = records[i].Contacts?.AdmArea;
-                if (admArea != null && admArea.ToLower().Contains(sub))
-                {
-                    data.Add(records[i]);
-                }
+                data.Add(records[i]);
             }
         }
 
@@ -52,12 +57,13 @@ public static class DataProcessing
     /// <param name="records"></param>
     /// <param name="type">Default sorting types.</param>
     /// <returns>Array of fields.</returns>
-    public static List<Theatre> SortingByCapacity(List<Theatre> records, string type)
+    public static List<Theatre> SortingByCapacity(List<Theatre> records, SortType type)
     {
         Theatre headers = records[0];
         records = records.GetRange(1, records.Count - 1);
         records = new List<Theatre>(records.OrderByDescending(t => t.Capacity));
-        if (type == "Ascending")
+        
+        if (type == SortType.Ascending)
         {
             records.Reverse();
         }
